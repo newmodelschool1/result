@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>স্কুল রেজাল্ট পোর্টাল</title>
+    <style>
+        /* আগের সব স্টাইল অপরিবর্তিত রাখা হয়েছে */
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body { 
+            font-family: 'Segoe UI', 'Helvetica Neue', sans-serif;
+            background-color: #f3f8ff; 
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            position: relative;
+            overflow-x: hidden;
+        }
+        
+        .card { 
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            padding: 40px 30px;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.1), 0 0 40px rgba(0, 82, 204, 0.1);
+            width: 100%;
+            max-width: 450px;
+            text-align: center;
+            position: relative;
+            z-index: 1;
+            border: 1px solid rgba(0, 82, 204, 0.1);
+            animation: slideDown 0.6s ease-out;
+        }
+        
+        @keyframes slideDown {
+            from { opacity: 0; transform: translateY(-30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        h2 { color: #001a4d; margin-bottom: 25px; font-size: 28px; font-weight: 700; letter-spacing: -0.5px; }
+        h3 { color: #0052cc; font-size: 18px; font-weight: 700; margin-bottom: 20px; }
+        
+        input { 
+            width: 100%; padding: 14px 16px; margin-bottom: 18px;
+            border: 2px solid rgba(0, 82, 204, 0.2); border-radius: 12px;
+            font-size: 15px; outline: none; background-color: #f8fafb;
+            color: #001a4d; transition: all 0.3s ease; font-family: inherit;
+        }
+        
+        input:focus { border-color: #0052cc; background-color: white; box-shadow: 0 0 0 4px rgba(0, 82, 204, 0.1); transform: translateY(-2px); }
+        
+        button { 
+            width: 100%; padding: 14px 20px;
+            background: linear-gradient(135deg, #001a4d 0%, #0052cc 100%);
+            color: white; border: none; border-radius: 12px;
+            font-size: 16px; cursor: pointer; font-weight: 700;
+            transition: all 0.3s ease; text-transform: uppercase;
+            letter-spacing: 0.5px; position: relative; overflow: hidden;
+        }
+        
+        button::before { content: ''; position: absolute; top: 0; left: -100%; width: 100%; height: 100%; background: rgba(255, 255, 255, 0.2); transition: left 0.3s ease; z-index: 1; }
+        button:hover::before { left: 100%; }
+        button:hover { transform: translateY(-3px); box-shadow: 0 10px 30px rgba(0, 82, 204, 0.4); }
+        button:active { transform: translateY(-1px); }
+        
+        .result-box { 
+            margin-top: 30px; text-align: left; display: none;
+            background: linear-gradient(135deg, rgba(0, 82, 204, 0.05) 0%, rgba(0, 52, 102, 0.05) 100%);
+            padding: 25px; border-radius: 15px; border-left: 4px solid #0052cc;
+            border-top: 1px solid rgba(0, 82, 204, 0.1); animation: fadeInUp 0.6s ease-out;
+        }
+        
+        @keyframes fadeInUp { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
+        
+        .row { display: flex; justify-content: space-between; padding: 12px 0; border-bottom: 1px solid rgba(0, 82, 204, 0.1); transition: all 0.3s ease; }
+        .row:hover { background-color: rgba(0, 82, 204, 0.03); padding-left: 10px; padding-right: 10px; border-radius: 8px; }
+        .row:last-of-type { border-bottom: none; }
+
+        .final-grade { 
+            background: linear-gradient(135deg, #001a4d 0%, #0052cc 100%);
+            border-radius: 12px; padding: 15px; margin-top: 15px;
+            font-weight: 700; color: white; border: none;
+            box-shadow: 0 10px 30px rgba(0, 82, 204, 0.3); border-left: none;
+        }
+        .final-grade:hover { background-color: transparent; box-shadow: 0 10px 30px rgba(0, 82, 204, 0.3); }
+        .final-grade .label { color: white; }
+        .final-grade span:last-child { font-size: 18px; font-weight: 700; }
+        
+        .label { font-weight: 700; color: #001a4d; }
+        
+        .error { 
+            color: #dc3545; margin-top: 15px; display: none; padding: 12px;
+            background-color: rgba(220, 53, 69, 0.1); border-radius: 8px;
+            border-left: 4px solid #dc3545; font-weight: 600; animation: shake 0.3s ease-out;
+        }
+        @keyframes shake { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-5px); } 75% { transform: translateX(5px); } }
+        
+        .loader { display: none; margin-top: 15px; color: #0052cc; font-weight: 600; animation: pulse 1.5s infinite; }
+        @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
+        
+        @media (max-width: 600px) {
+            .card { padding: 30px 20px; max-width: 100%; }
+            h2 { font-size: 24px; }
+            .result-box { padding: 20px; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="card">
+    <h2>🎓 রেজাল্ট পোর্টাল</h2>
+    <input type="number" id="phoneInput" placeholder="আপনার ফোন নাম্বার দিন">
+    <button onclick="searchResult()">রেজাল্ট দেখুন</button>
+    
+    <div id="loader" class="loader">তথ্য খোঁজা হচ্ছে...</div>
+    <div id="errorMessage" class="error">দুঃখিত! এই নাম্বারে কোনো রেজাল্ট পাওয়া যায়নি।</div>
+
+    <div id="resultArea" class="result-box">
+        <h3 style="text-align:center; margin-top:0; color: #007bff;">শিক্ষার্থীর তথ্য</h3>
+        <div class="row"><span class="label">নাম:</span> <span id="rName"></span></div>
+        <div class="row"><span class="label">শ্রেণী:</span> <span id="rClass"></span></div>
+        <div class="row"><span class="label">রোল:</span> <span id="rRoll"></span></div>
+        <hr>
+        
+        <div id="rowSem1" class="row"><span class="label">১ম সেমিস্টার:</span> <span id="rSem1"></span></div>
+        <div id="rowSem2" class="row"><span class="label">২য় সেমিস্টার:</span> <span id="rSem2"></span></div>
+        <div id="rowSem3" class="row"><span class="label">৩য় সেমিস্টার:</span> <span id="rSem3"></span></div>
+        <div id="rowSem4" class="row"><span class="label">৪র্থ সেমিস্টার:</span> <span id="rSem4"></span></div>
+        
+        <div id="rowGrading" class="row final-grade">
+            <span>চূড়ান্ত গ্রেডিং:</span> <span id="rGrading"></span>
+        </div>
+    </div>
+</div>
+
+<script>
+    // ***************** গাইডলাইন *****************
+    // নিচের ডবল কোটেশনের ভেতরে আপনার Google Apps Script এর Web App URL টি দিন
+    const scriptURL = "https://script.google.com/macros/s/AKfycbyrHA27i2gQXR1j2oABAOa0e8fh_6Cu5Yf37S_ux_1rItgjGdXEm1nHyDaWTkhZTCzG/exec"; 
+    // *******************************************
+
+    function searchResult() {
+        const phone = document.getElementById('phoneInput').value.trim();
+        const resultArea = document.getElementById('resultArea');
+        const errorMsg = document.getElementById('errorMessage');
+        const loader = document.getElementById('loader');
+
+        if (!phone) { alert("দয়া করে ফোন নাম্বার লিখুন!"); return; }
+
+        resultArea.style.display = 'none';
+        errorMsg.style.display = 'none';
+        loader.style.display = 'block';
+
+        // নতুন Fetch URL ফরম্যাট (SheetDB এর থেকে একটু আলাদা)
+        fetch(`${scriptURL}?Phone=${phone}`)
+            .then(response => response.json())
+            .then(data => {
+                loader.style.display = 'none';
+                
+                // Apps Script এরে (Array) হিসেবে ডাটা পাঠায়
+                if (data && data.length > 0) {
+                    const student = data[0]; 
+                    
+                    document.getElementById('rName').innerText = student.Name;
+                    document.getElementById('rClass').innerText = student.Class;
+                    document.getElementById('rRoll').innerText = student.Roll;
+                    
+                    checkAndShow('rowSem1', 'rSem1', student.Sem1);
+                    checkAndShow('rowSem2', 'rSem2', student.Sem2);
+                    checkAndShow('rowSem3', 'rSem3', student.Sem3);
+                    checkAndShow('rowSem4', 'rSem4', student.Sem4);
+                    checkAndShow('rowGrading', 'rGrading', student.Grading);
+
+                    resultArea.style.display = 'block';
+                } else {
+                    errorMsg.style.display = 'block';
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                loader.style.display = 'none';
+                alert("সার্ভারে সমস্যা হচ্ছে, পরে আবার চেষ্টা করুন।");
+            });
+    }
+
+    function checkAndShow(rowId, spanId, value) {
+        const row = document.getElementById(rowId);
+        const span = document.getElementById(spanId);
+
+        if (value && value.toString().trim() !== "") {
+            span.innerText = value;
+            row.style.display = "flex";
+        } else {
+            row.style.display = "none";
+        }
+    }
+</script>
+
+</body>
+</html>
